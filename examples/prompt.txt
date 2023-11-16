@@ -60,7 +60,10 @@ F) Order of Search Priorities
 # Mission Reasoning
 First, consider all the constraints placed on the mission. Describe any obstacles present in the current constraints.Then, describe how you plan to construct the flight plans. Use this to make a draft of your plans. Enclose your answer inside of <reasoning></reasoning>
 
-Then, create a flight route for each drones to cover the entire search area. Each flight plan should be enclosed in <drone></drone> and include:
-	- The drone ID enclosed within <id></id>	- List of cells coordinates (x,y) determining the drone's flight route within <cells></cells>.
-The flight route should begin with the drone current cell, followed by 3 cells to search and the cell of the closest charging station.Continue the pattern of 3 search cells and a charging station until the plan is complete. List search cells and charging stations in the same <cells></cells>.This section should be formatted as strict XML and include complete flight plans.
+Then, create a flight route for each drones to cover the entire search area. Each flight plan should be enclosed in <{DRONE_KEY}></{DRONE_KEY}> and include:
+
+- The drone ID enclosed within <id></id>
+- List of cells coordinates (x,y) determining the drone's flight route within <cells></cells>.
+- The flight route should begin with the drone current cell, followed by 3 cells to search and the cell of the closest charging station.Continue the pattern of 3 search cells and a charging station until the plan is complete. List search cells and charging stations in the same <cells></cells>.This section should be formatted as strict XML and include complete flight plans.
+
 >

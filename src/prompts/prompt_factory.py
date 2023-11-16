@@ -126,15 +126,15 @@ class PromptFactory:
 
     @staticmethod
     def _build_task_prompt(response_manager: PromptResponseManager):
-        return Prompt(
-            "Then, create a flight route for each drones to cover the entire search area. "
-            f"Each flight plan should be enclosed in <{DRONE_KEY}></{DRONE_KEY}> and include:\n"
-            f"\t- The drone ID enclosed within <{DRONE_ID_KEY}></{DRONE_ID_KEY}>"
-            f"\t- List of cells coordinates (x,y) determining the drone's flight route within <{CELLS_KEY}></{CELLS_KEY}>. "
-            "\nThe flight route should begin with the drone current cell, "
+        instructions = "Then, create a flight route for each drones to cover the entire search area. " \
+                       "Each flight plan should be enclosed in <{DRONE_KEY}></{DRONE_KEY}> and include:\n"
+        flight_plan_questionnaire = QuestionnairePrompt([
+            Prompt(f"The drone ID enclosed within <{DRONE_ID_KEY}></{DRONE_ID_KEY}>"),
+            Prompt(f"List of cells coordinates (x,y) determining the drone's flight route within <{CELLS_KEY}></{CELLS_KEY}>."),
+            Prompt("The flight route should begin with the drone current cell, "
             "followed by {cells_in_single_battery} cells to search and the cell of the closest charging station."
             "Continue the pattern of {cells_in_single_battery} search cells and a charging station until the plan is complete. "
             f"List search cells and charging stations in the same <{CELLS_KEY}></{CELLS_KEY}>."
-            "This section should be formatted as strict XML and include complete flight plans.",
-            response_manager=response_manager
-        )
+            "This section should be formatted as strict XML and include complete flight plans.")
+        ], response_manager=response_manager, instructions=instructions, enumeration_chars=["-"])
+        return flight_plan_questionnaire
