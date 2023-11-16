@@ -1,4 +1,13 @@
 # Getting Started
+1. Install pip requirements
+```commandline
+$ pip3 install -r requirements.txt
+```
+2. Add .env file
+```
+OPEN_AI_ORG=[YOUR_ORG_HERE]
+OPEN_AI_KEY=[YOUR_ORG_KEY]
+```
 # Creation Prompt
 - runner.py: Example / interactive playground for testing prompt building and parsing.
 - core/drone_variables.py: The parameters to be included in the prompt.
