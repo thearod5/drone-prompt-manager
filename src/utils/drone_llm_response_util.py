@@ -37,9 +37,10 @@ class LLMResponseUtil:
                     if c:
                         content.append(c)
             assert len(content) > 0, f"Found no tags ({tag_name}) in:\n{res}"
-        except Exception:
+        except Exception as e:
             error = f"{NEW_LINE}Unable to parse {tag_name}"
             print(error)
+            print(e)
             if raise_exception:
                 raise Exception(error)
             content = [res] if return_res_on_failure else []

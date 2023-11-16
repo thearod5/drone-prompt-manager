@@ -127,7 +127,7 @@ class PromptFactory:
     @staticmethod
     def _build_task_prompt(response_manager: PromptResponseManager):
         instructions = "Then, create a flight route for each drones to cover the entire search area. " \
-                       "Each flight plan should be enclosed in <{DRONE_KEY}></{DRONE_KEY}> and include:\n"
+                       f"Each flight plan should be enclosed in <{DRONE_KEY}></{DRONE_KEY}> and include:\n"
         flight_plan_questionnaire = QuestionnairePrompt([
             Prompt(f"The drone ID enclosed within <{DRONE_ID_KEY}></{DRONE_ID_KEY}>"),
             Prompt(f"List of cells coordinates (x,y) determining the drone's flight route within <{CELLS_KEY}></{CELLS_KEY}>."),

@@ -1,30 +1,32 @@
 <reasoning>
-The search area is divided into two types of terrains: waterways and woodland. The priority is to search the waterways first. The waterways are located in the top left corner, bottom left corner, and the right side of the grid. The woodland areas are scattered throughout the grid.
+The search area is divided into two types of terrains: waterways and woodland. The priority is to search the waterways first. The waterways are located at the top left, bottom left, and bottom right of the grid. The woodland areas are located in the middle and bottom right of the grid.
 
-The drones will start from the origin point at (1,1). Each drone can fly for 30 minutes before needing to recharge batteries. Battery changing stations are located at coordinates (1,1), (1, 14), (8, 14), (8,1). A drone can search up to 3 cells during a 30 minute flight.
+The drones available for the mission are Red, Blue, Purple, Yellow, and Green. The Blue drone has a thermal camera which will be useful for searching during dusk or nighttime conditions. The Purple drone is equipped with a flotation device which could be useful in the waterways.
 
-The drones will be assigned to different areas based on their capabilities. The drone with the thermal camera (Blue) will be assigned to search during dusk or nighttime conditions. The drone with the flotation device (Purple) will be assigned to search the waterways. The remaining drones (Red, Yellow, Green) will be assigned to search the woodland areas.
+The flight plans will be constructed in such a way that each drone will search 3 cells and then go to the nearest charging station. The drones will start from the origin point at (1,1) and will cover the search area in a systematic way. The drones will first cover the waterways and then move on to the woodland areas.
 
-The flight plans will be constructed to maximize the search efficiency and battery life. The drones will search the closest 3 cells and then fly to the closest charging station. This will ensure that at least one drone is always searching and that the drones are using their battery life efficiently.
+The Blue drone will be used to search the waterways at the bottom right of the grid during dusk or nighttime conditions. The Purple drone will be used to search the waterways at the top left and bottom left of the grid. The Red, Yellow, and Green drones will be used to search the woodland areas.
+
+The flight plans will be adjusted as necessary to ensure that at least one drone is always searching and that the drones are maximizing their battery life.
 </reasoning>
 
 <drone>
 	<id>Red</id>
-	<cells>(1,1),(2,2),(2,3),(2,4),(1,1),(2,5),(2,6),(3,4),(1,1),(3,5),(3,6),(4,4),(1,1),(4,5),(4,6),(5,8),(1,1)</cells>
+	<cells>(1,1),(1,5),(2,3),(2,4),(1,1),(2,5),(2,6),(3,4),(1,1),(3,5),(3,6),(4,4),(1,1)</cells>
 </drone>
 <drone>
 	<id>Blue</id>
-	<cells>(1,1),(3,1),(3,2),(3,3),(1,1),(4,1),(4,2),(4,3),(1,1),(5,1),(5,2),(5,3),(1,1),(6,1),(7,1),(8,1),(1,1),(8,2),(8,3),(8,4),(1,14),(8,5),(8,6),(8,7),(1,14),(8,8),(8,9),(7,9),(1,14),(6,9),(1,13),(1,14),(1,14),(2,12),(2,13),(2,14),(1,14),(3,12),(3,13),(3,14),(1,14),(4,12),(4,13),(4,14),(1,14)</cells>
+	<cells>(1,1),(1,13),(1,14),(2,12),(1,14),(2,13),(2,14),(3,12),(1,14),(3,13),(3,14),(4,12),(1,14)</cells>
 </drone>
 <drone>
 	<id>Purple</id>
-	<cells>(1,1),(1,5),(2,5),(3,5),(1,1),(4,5),(5,8),(6,8),(1,1),(7,5),(7,6),(7,7),(1,1)</cells>
+	<cells>(1,1),(2,2),(3,1),(3,2),(1,1),(3,3),(4,1),(4,2),(1,1),(4,3),(5,1),(5,2),(1,1),(5,3),(6,1),(7,1),(1,1)</cells>
 </drone>
 <drone>
 	<id>Yellow</id>
-	<cells>(1,1),(7,6),(7,7),(7,9),(1,14),(6,12),(6,13),(6,14),(1,14),(7,12),(7,13),(7,14),(1,14),(8,11),(1,14)</cells>
+	<cells>(1,1),(4,5),(4,6),(5,8),(1,1),(6,8),(7,5),(7,6),(1,1),(7,7),(4,13),(4,14),(1,1)</cells>
 </drone>
 <drone>
 	<id>Green</id>
-	<cells>(1,1),(5,12),(5,13),(5,14),(1,14)</cells>
+	<cells>(1,1),(5,12),(5,13),(5,14),(1,1),(6,12),(6,13),(6,14),(1,1),(7,12),(7,13),(7,14),(1,1)</cells>
 </drone>

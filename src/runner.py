@@ -29,7 +29,6 @@ def run(use_mock: bool = True):
     prompt = prompt_factory.build()
 
     logging.info(prompt)
-    print(os.listdir())
     res_text = read_file("../output/response.txt") if use_mock else LLMManager.make_completion(prompt)
     logging.info(res_text)
 
