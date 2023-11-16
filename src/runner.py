@@ -30,7 +30,7 @@ def run(use_mock: bool = True):
 
     logging.info(prompt)
     print(os.listdir())
-    res_text = read_file("../output/example.txt") if use_mock else LLMManager.make_completion(prompt)
+    res_text = read_file("../output/response.txt") if use_mock else LLMManager.make_completion(prompt)
     logging.info(res_text)
 
     drones = prompt_factory.parse(res_text)

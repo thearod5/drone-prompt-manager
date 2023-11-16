@@ -9,6 +9,7 @@ OPEN_AI_ORG=[YOUR_ORG_HERE]
 OPEN_AI_KEY=[YOUR_ORG_KEY]
 ```
 # Creation Prompt
+- examples/**: Prompt and response from OpenAI (gpt-4)
 - runner.py: Example / interactive playground for testing prompt building and parsing.
 - core/drone_variables.py: The parameters to be included in the prompt.
 - prompts/*: Stripped out version of the prompt code used in SAFA.
