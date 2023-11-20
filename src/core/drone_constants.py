@@ -1,6 +1,7 @@
 import os
 
 from prompts.prompt_args import PromptArgs
+
 """
 Lists all the constants used throughout the project.
 """
@@ -34,3 +35,4 @@ COLON = ":"
 L_CARROT = "<"
 R_CARROT = ">"
 L_BRACKET = "["
+R_BRACKET = "]"

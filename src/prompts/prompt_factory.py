@@ -4,11 +4,11 @@ from typing import Dict, List
 from core.drone_constants import CELLS_KEY, DRONE_ID_KEY, DRONE_KEY, DronePromptArgs, NEW_LINE
 from core.drone_plan import DronePlan
 from core.drone_variables import DroneVariables
+from prompts.multi_dict_prompt import MultiDictPrompt
 from prompts.prompt import Prompt
 from prompts.prompt_builder import PromptBuilder
 from prompts.prompt_response_manager import PromptResponseManager
 from prompts.questionnaire_prompt import QuestionnairePrompt
-from prompts.multi_dict_prompt import MultiDictPrompt
 from utils.drone_util import parse_coordinates
 
 
@@ -40,6 +40,7 @@ class PromptFactory:
                                     terrains=self.variables.terrains,
                                     battery_time=self.variables.battery_time,
                                     cells_in_single_battery=self.variables.cells_in_single_battery,
+                                    weather_status=self.variables.weather_status,
                                     battery_changing_stations=self.variables.battery_changing_stations,
                                     delimiter=NEW_LINE + NEW_LINE)
         prompt_text = prompt["prompt"]
@@ -58,10 +59,9 @@ class PromptFactory:
         drone_plans = [DronePlan(d_id, blocks) for d_id, blocks in id2struct.items()]
         return drone_plans
 
-    @classmethod
-    def entry_formatter(cls, v) -> Dict:
+    def entry_formatter(self, v) -> Dict:
         drone_id = v[DRONE_ID_KEY][0]
-        cells = [c for c_text in v[CELLS_KEY] for c in parse_coordinates(c_text)]
+        cells = [c for c_text in v[CELLS_KEY] for c in parse_coordinates(c_text, alpha_format=self.variables.use_alphabetical)]
         return {
             DRONE_ID_KEY: drone_id,
             CELLS_KEY: cells
@@ -73,18 +73,20 @@ class PromptFactory:
         coordinate_list = [coord for coord in parsed_data]
         return coordinate_list
 
-    @staticmethod
-    def _build_mission_description():
+    def _build_mission_description(self):
+        top_right_coordinate = self.variables.translate_coordinate((1, 1))
+        bottom_right_coordinate = self.variables.translate_coordinate((self.variables.n_width_blocks, self.variables.n_height_blocks))
         return Prompt(
             "A critical search and rescue mission is underway to locate a missing person in a designated area. "
             "The search zone has been organized into a grid format {n_width_blocks} cells wide and {n_height_blocks} cells high. "
-            "Coordinate (1,1) is the top-left corner and ({n_width_blocks},{n_height_blocks}) is bottom-right corner.\n\n"
+            f"Coordinate {top_right_coordinate} is the top-left corner and {bottom_right_coordinate} is bottom-right corner.\n\n"
             "Drones will start from the origin point at {launch_point}. "
             "Each drone can fly for 30 minutes before needing to recharge batteries. "
             "Battery changing stations are located at coordinates {battery_changing_stations}. "
             "A drone can search up to {cells_in_single_battery} cells during a {battery_time} minute flight."
             "Drones can travel a maximum of {drone_max_distance} cells horizontally or vertically in one flight in one flight.\n\n"
-            "Your task is to formulate a comprehensive plan using these drones to locate the missing person in the shortest time possible. ",
+            "Your task is to formulate a comprehensive plan using these drones to locate the missing person in the shortest time possible. "
+            "Today's weather is {weather_status}.",
             title="Mission Description"
         )
 
@@ -124,17 +126,16 @@ class PromptFactory:
             title="Mission Reasoning", response_manager=PromptResponseManager(response_tag="reasoning")
         )
 
-    @staticmethod
-    def _build_task_prompt(response_manager: PromptResponseManager):
+    def _build_task_prompt(self, response_manager: PromptResponseManager):
         instructions = "Then, create a flight route for each drones to cover the entire search area. " \
                        f"Each flight plan should be enclosed in <{DRONE_KEY}></{DRONE_KEY}> and include:\n"
         flight_plan_questionnaire = QuestionnairePrompt([
             Prompt(f"The drone ID enclosed within <{DRONE_ID_KEY}></{DRONE_ID_KEY}>"),
-            Prompt(f"List of cells coordinates (x,y) determining the drone's flight route within <{CELLS_KEY}></{CELLS_KEY}>."),
+            Prompt(f"List of cells coordinates determining the drone's flight route within <{CELLS_KEY}></{CELLS_KEY}>."),
             Prompt("The flight route should begin with the drone current cell, "
-            "followed by {cells_in_single_battery} cells to search and the cell of the closest charging station."
-            "Continue the pattern of {cells_in_single_battery} search cells and a charging station until the plan is complete. "
-            f"List search cells and charging stations in the same <{CELLS_KEY}></{CELLS_KEY}>."
-            "This section should be formatted as strict XML and include complete flight plans.")
+                   "followed by {cells_in_single_battery} cells to search and the cell of the closest charging station. "
+                   "Continue the pattern of {cells_in_single_battery} search cells and a charging station until the plan is complete. "
+                   f"List search cells and charging stations in the same <{CELLS_KEY}></{CELLS_KEY}>. "
+                   "This section should be formatted as strict XML and include complete flight plans.")
         ], response_manager=response_manager, instructions=instructions, enumeration_chars=["-"])
         return flight_plan_questionnaire

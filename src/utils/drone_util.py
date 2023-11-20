@@ -5,7 +5,7 @@ import string
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from core.drone_constants import L_BRACKET
+from core.drone_constants import COMMA, EMPTY_STRING, L_BRACKET, R_BRACKET
 
 
 def read_file(file_path: str, raise_exception: bool = True) -> Optional[str]:
@@ -26,7 +26,7 @@ def read_file(file_path: str, raise_exception: bool = True) -> Optional[str]:
         return None
 
 
-def parse_coordinates(r: str, as_list: bool = True) -> Union[List, Tuple]:
+def parse_coordinates(r: str, as_list: bool = True, alpha_format: bool = False) -> Union[List, Tuple]:
     """
     Parses a list of coordinates in string form (e.g. := (1,1), (2,1) or [(1,1), (2,1)]
     :param r: The text to convert.
@@ -35,13 +35,18 @@ def parse_coordinates(r: str, as_list: bool = True) -> Union[List, Tuple]:
     """
     if L_BRACKET not in r:
         r = f"[{r}]"
-    parsed_data = ast.literal_eval(r)
-    if as_list:
-        parsed_data = [d for d in parsed_data]
+    if not alpha_format:
+        parsed_data = ast.literal_eval(r)
+        if as_list:
+            parsed_data = [d for d in parsed_data]
+    else:
+        r = r.replace(L_BRACKET, EMPTY_STRING).replace(R_BRACKET, EMPTY_STRING)
+        coordinates = r.split(COMMA)
+        parsed_data = to_numeric(coordinates)
     return parsed_data
 
 
-def to_numeric(cells: List[str], starting_index: int =1) -> List[Tuple]:
+def to_numeric(cells: List[str], starting_index: int = 1) -> List[Tuple]:
     """
     Translates alphabetical coordinates (A1) to numeric ones (1,1).
     :param cells: The cells to convert.
