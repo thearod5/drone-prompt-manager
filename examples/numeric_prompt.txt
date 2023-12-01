@@ -1,9 +1,9 @@
 # Mission Description
-A critical search and rescue mission is underway to locate a missing person in a designated area. The search zone has been organized into a grid format 8 cells wide and 14 cells high. Coordinate (1,1) is the top-left corner and (8,14) is bottom-right corner.
+A critical search and rescue mission is underway to locate a missing person in a designated area. The search zone has been organized into a grid format 8 cells wide and 14 cells high. Coordinate (1, 1) is the top-left corner and (8, 14) is bottom-right corner.
 
-Drones will start from the origin point at (1,1). Each drone can fly for 30 minutes before needing to recharge batteries. Battery changing stations are located at coordinates (1,1), (1, 14), (8, 14), (8,1). A drone can search up to 3 cells during a 30 minute flight.Drones can travel a maximum of 8 cells horizontally or vertically in one flight in one flight.
+Drones will start from the origin point at (1, 1). Each drone can fly for 30 minutes before needing to recharge batteries. Battery changing stations are located at coordinates (1, 1),(1, 14),(8, 14),(8, 1). A drone can search up to 3 cells during a 30 minute flight.Drones can travel a maximum of 8 cells horizontally or vertically in one flight in one flight.
 
-Your task is to formulate a comprehensive plan using these drones to locate the missing person in the shortest time possible.
+Your task is to formulate a comprehensive plan using these drones to locate the missing person in the shortest time possible. Today's weather is sunny.
 
 # Drone Statuses
 <drone>
@@ -63,7 +63,7 @@ First, consider all the constraints placed on the mission. Describe any obstacle
 Then, create a flight route for each drones to cover the entire search area. Each flight plan should be enclosed in <drone></drone> and include:
 
 - The drone ID enclosed within <id></id>
-- List of cells coordinates (x,y) determining the drone's flight route within <cells></cells>.
-- The flight route should begin with the drone current cell, followed by 3 cells to search and the cell of the closest charging station.Continue the pattern of 3 search cells and a charging station until the plan is complete. List search cells and charging stations in the same <cells></cells>.This section should be formatted as strict XML and include complete flight plans.
+- List of cells coordinates determining the drone's flight route within <cells></cells>.
+- The flight route should begin with the drone current cell, followed by 3 cells to search and the cell of the closest charging station. Continue the pattern of 3 search cells and a charging station until the plan is complete. List search cells and charging stations in the same <cells></cells>. This section should be formatted as strict XML and include complete flight plans.
 
 >

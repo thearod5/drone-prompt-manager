@@ -8,13 +8,15 @@ from prompts.prompt_factory import PromptFactory
 from test_data import test_drones, test_terrains
 from utils.drone_util import read_file
 
+MOCK_DEFAULT = True
+ALPHA_DEFAULT = True
 test_responses = {
     False: "../examples/numeric_response.txt",
     True: "../examples/alpha_response.txt"
 }
 
 
-def run(mock_response: bool = True, alpha_format: bool = True):
+def run(mock_response: bool = MOCK_DEFAULT, alpha_format: bool = ALPHA_DEFAULT):
     logging.basicConfig()
     logging.root.setLevel(logging.INFO)
     logging.info("Starting prompt runner...")
@@ -36,7 +38,7 @@ def run(mock_response: bool = True, alpha_format: bool = True):
     prompt_factory = PromptFactory(drone_variables)
     prompt = prompt_factory.build()
 
-    logging.info(prompt)
+    logging.info("waiting for response....")
     test_file = test_responses[alpha_format]
     res_text = read_file(test_file) if mock_response else LLMManager.make_completion(prompt)
     logging.info(res_text)
@@ -56,11 +58,11 @@ def prompt_tf(prompt: str, default_value: Any = None) -> bool:
 
 
 if __name__ == "__main__":
-    use_prompt = False
+    use_interactive = False
     kwargs = {}
-    if use_prompt:
-        kwargs["mock_response"] = prompt_tf("Mock OpenAI responses? (t/f)", True)
-        kwargs["alpha_format"] = prompt_tf("Use alphabetical format (t/f)?", True)
+    if use_interactive:
+        kwargs["mock_response"] = prompt_tf("Mock OpenAI responses? (t/f)", MOCK_DEFAULT)
+        kwargs["alpha_format"] = prompt_tf("Use alphabetical format (t/f)?", ALPHA_DEFAULT)
     output = run(**kwargs)
     for drone in output:
         print(drone.id, ":", drone.coordinates)

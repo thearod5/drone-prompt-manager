@@ -24,7 +24,7 @@ class LLMManager:
     """
 
     @staticmethod
-    def make_completion(prompt: str, temperature: float = 0, model: OpenAIModel = OpenAIModel.GPT4) -> AIObject:
+    def make_completion(prompt: str, temperature: float = 0, model: OpenAIModel = OpenAIModel.GPT3) -> AIObject:
         """
         Makes a request to completion a model
         :param prompt: The prompt to make completion for.
@@ -34,7 +34,9 @@ class LLMManager:
         """
 
         assert isinstance(model, OpenAIModel), f"Expected OpenAIModel to be passed in but got {model}."
+        max_tokens = model.get_max_tokens()
         params = {
+            "max_tokens": max_tokens,
             "temperature": temperature,
             "model": model.value,
             "messages": [{"role": "user", "content": prompt}]}
