@@ -1,30 +1,41 @@
 <reasoning>
-The search area is divided into two types of terrains: waterways and woodlands. According to the mission objectives, waterways are the highest priority for search. The drones available for the mission have different capabilities. The Blue drone has a thermal camera which can be useful during dusk or nighttime conditions. However, since the weather is sunny, this feature will not be utilized in this mission. The Purple drone has a flotation device, which can be useful in waterway areas.
-
-The flight plans will be constructed in such a way that each drone will cover a specific area of the search zone. The drones will start from the origin point at A1 and will search 3 cells during a 30 minute flight before returning to the closest charging station. The charging stations are located at coordinates A1, A14, H14, H1.
-
-The Red and Yellow drones will cover the top left quadrant of the search area. The Blue and Green drones will cover the top right quadrant. The Purple drone will cover the bottom half of the search area. This division of the search area will ensure that at least one drone is always searching and will maximize the battery life of the drones.
-
-The flight plans will be constructed in such a way that the drones will first cover the waterway areas and then move on to the woodland areas. This will ensure that the search efficiency is maximized by prioritizing high probability areas.
+A) Flights should be prioritized based on the type of terrain, with bodies of water being the highest priority, followed by woods, and then areas adjacent to woods.
+B) No, drones cannot search cells that have already been searched in the current plan.
+C) Battery usage could be optimized by minimizing the distance from the last searched cell to its charging station and by planning efficient flight paths.
 </reasoning>
 
 <drone>
 	<id>Red</id>
-	<cells>A1,B2,C1,A1,C2,C3,D1,A1,D2,D3,E1,A1</cells>
-</drone>
-<drone>
-	<id>Yellow</id>
-	<cells>A1,E2,E3,F1,A1,G1,H1,A1,H2,H3,H4,A1</cells>
+	<flight round>1</flight round>
+	<a>H9</a>
+	<b>I9,I10,I11</b>
+	<c>T5</c>
 </drone>
 <drone>
 	<id>Blue</id>
-	<cells>A1,H5,H6,H7,H1,H8,H9,G9,H1,F9,G1,H1</cells>
-</drone>
-<drone>
-	<id>Green</id>
-	<cells>A1,A5,B3,B4,A1,B5,B6,C4,A1,C5,C6,D4,A1,D5,D6,E8,A1,F8,G5,G6,A1,G7,H1</cells>
+	<flight round>1</flight round>
+	<a>H9</a>
+	<b>H10,I10,J10</b>
+	<c>P14</c>
 </drone>
 <drone>
 	<id>Purple</id>
-	<cells>A1,A13,A14,B12,A14,B13,B14,C12,A14,C13,C14,D12,A14,D13,D14,E12,A14,E13,E14,F12,A14,F13,F14,G12,H14,G13,G14,H11,H14</cells>
+	<flight round>1</flight round>
+	<a>H9</a>
+	<b>H8,I8,I9</b>
+	<c>T5</c>
+</drone>
+<drone>
+	<id>Yellow</id>
+	<flight round>1</flight round>
+	<a>H9</a>
+	<b>G9,H9,I9</b>
+	<c>T5</c>
+</drone>
+<drone>
+	<id>Green</id>
+	<flight round>1</flight round>
+	<a>H9</a>
+	<b>G8,G9,H9</b>
+	<c>T5</c>
 </drone>

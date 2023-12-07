@@ -1,13 +1,14 @@
 import os
 
 from prompts.prompt_args import PromptArgs
-
+import string
 """
 Lists all the constants used throughout the project.
 """
 DRONE_KEY = "drone"
 DRONE_ID_KEY = "id"
 STATION_KEY = "station"
+START_KEY, SEARCH_KEY, END_KEY = string.ascii_lowercase[:3]
 CELLS_KEY = "cells"
 PROMPY_KEY = "prompt"
 COMPLETION_KEY = "completion"
@@ -36,3 +37,5 @@ L_CARROT = "<"
 R_CARROT = ">"
 L_BRACKET = "["
 R_BRACKET = "]"
+N_DRONE_FLIGHTS = 5
+STARTING_FLIGHT_PLAN_NUM = 0

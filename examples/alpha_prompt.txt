@@ -1,11 +1,31 @@
 # Mission Description
-A critical search and rescue mission is underway to locate a missing person in a designated area. The search zone has been organized into a grid format 8 cells wide and 14 cells high. Coordinate A1 is the top-left corner and H14 is bottom-right corner.
+A critical search and rescue mission is underway to locate a missing person in a designated area. The search zone has been organized into a grid format 28 cells wide and 16 cells high. Coordinate A1 is the top-left corner and P28 is bottom-right corner. A cell in the top row is not adjacent to a cell in the bottom row.  There is no wrapping.  This is also true of the leftmost and rightmost columns.  They are not adjacent to each other.
 
-Drones will start from the origin point at A1. Each drone can fly for 30 minutes before needing to recharge batteries. Battery changing stations are located at coordinates A1,A14,H14,H1. A drone can search up to 3 cells during a 30 minute flight.Drones can travel a maximum of 8 cells horizontally or vertically in one flight in one flight.
+Each drone can fly for 30 minutes before needing to recharge batteries. All drones start their first flight at the launch pad.  All subsequent flights start at recharging stations.
 
-Your task is to formulate a comprehensive plan using these drones to locate the missing person in the shortest time possible. Today's weather is sunny.
+Each flight consists of three stages:
+A) Flying from its current cell to the starting cell of its search.
+B) A series of adjacent cells representing its search. It can search 3 cells.
+C) A flight from the final cell searched to a charging station or back to the launch point which is also a charging station.
 
-# Drone Statuses
+
+Search RULES are
+A) IF a cell has already been searched it MUST NOT be searched again in this plan.
+
+
+# Search strategies
+A) Minimize the distance from the last searched cell to its charging station.
+B) Order of Search Priorities
+    i.) Search bodies of water first.
+    ii.) Search woods next.
+    iii.) Search areas immediately adjacent to woods.
+
+
+
+# Drones
+
+All drones start at the launch point.  The launch point is an additional battery charging station.
+ Here are the available drones:
 <drone>
 	<id>Red</id>
 	<camera>RBG</camera>
@@ -29,41 +49,50 @@ Your task is to formulate a comprehensive plan using these drones to locate the 
 </drone>
 
 # Search Area
+
+The location of woods, water bodies, the launch pad, and charging stations is provided in this xml file:
 <terrain>
 	<type>Waterway</type>
-	<blocks>B2,C1,C2,C3,D1,D2,D3,E1,E2,E3,F1,G1,H1,H2,H3,H4,H5,H6,H7,H8,H9,G9,F9</blocks>
+	<blocks>V2,W2,X2,V3,W3,X3,U4,V4,W4,X4,U5,V5,W5,X5,U6,V6,W6,U7,V7,W7,X7</blocks>
 </terrain>
 <terrain>
 	<type>Woodland</type>
-	<blocks>A5,B3,B4,B5,B6,C4,C5,C6,D4,D5,D6,E8,F8,G5,G6,G7</blocks>
+	<blocks>C2,D2,E2,F2,C3,D3,E3,F3,C4,D4,E4,F4,C5,D5,E5,F5,E6,F6,E7,F7</blocks>
 </terrain>
 <terrain>
 	<type>Waterway</type>
-	<blocks>A13,A14,B12,B13,B14,C12,C13,C14,D12</blocks>
+	<blocks>B10,C10,D10,B11,C11,D11,B12,C12,D12,B13,C13,B14,B15,J16,K16,L16,B16,C16,D16,E16,F16,G16,H16,I16</blocks>
 </terrain>
 <terrain>
 	<type>Woodland</type>
-	<blocks>D13,D14,E12,E13,E14,F12,F13,F14,G12,G13,G14,H11</blocks>
+	<blocks>O5,P5,Q5,O6,P6,Q6,M7,N7,O7,P7,M8,N8,O8,M9,N9,N10</blocks>
+</terrain>
+<terrain>
+	<type>LaunchPad</type>
+	<blocks>H9</blocks>
+</terrain>
+<terrain>
+	<type>BatteryCharging</type>
+	<blocks>P14</blocks>
+</terrain>
+<terrain>
+	<type>BatteryCharging</type>
+	<blocks>T5</blocks>
 </terrain>
 
-# Objectives
-A) Maximize search efficiency by prioritizing high probability areas.
-B) Create flight plans that maximize its battery life.
-C) Select the closest charging station to the drone's last search area.
-D) Ensure at least one drone is always searching.
-E) During dusk or nighttime conditions use thermal camera.
-F) Order of Search Priorities
-    i. Waterways
-
-
-
-# Mission Reasoning
-First, consider all the constraints placed on the mission. Describe any obstacles present in the current constraints.Then, describe how you plan to construct the flight plans. Use this to make a draft of your plans. Enclose your answer inside of <reasoning></reasoning>
-
-Then, create a flight route for each drones to cover the entire search area. Each flight plan should be enclosed in <drone></drone> and include:
-
-- The drone ID enclosed within <id></id>
-- List of cells coordinates determining the drone's flight route within <cells></cells>.
-- The flight route should begin with the drone current cell, followed by 3 cells to search and the cell of the closest charging station. Continue the pattern of 3 search cells and a charging station until the plan is complete. List search cells and charging stations in the same <cells></cells>. This section should be formatted as strict XML and include complete flight plans.
+# TASKS
+A) First, please explain what you understand about the mission by answering three questions:
+    A) How should flights be prioritized?
+    B) Can drones search cells that have already been searched?
+    C) How could battery usage be optimized?
+ Enclose your answer inside of <reasoning></reasoning>
+B) Next, please plan the first flight for each of the 5 drones.  Remember they each of them must start at the launch pad, cover approximately 3 cells, and then return to a charging cell. Structure output as follows:
+<drone>
+	<id>[Drone ID e.g., Purple]</id>
+	<flight round>1</flight round>
+	<a>[Starting Cell]</a>
+	<b>[List of cells to search separated by commas]</b>
+	<c>[Ending Cell]</c>
+</drone>
 
 >

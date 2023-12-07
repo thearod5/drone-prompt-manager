@@ -33,8 +33,6 @@ def parse_coordinates(r: str, as_list: bool = True, alpha_format: bool = False) 
     :param as_list: Whether the result should be converted into a list or left as is.
     :return: The parsed data.
     """
-    if L_BRACKET not in r:
-        r = f"[{r}]"
     if not alpha_format:
         parsed_data = ast.literal_eval(r)
         if as_list:
@@ -55,8 +53,9 @@ def to_numeric(cells: List[str], starting_index: int = 1) -> List[Tuple]:
     """
     block_coordinates = []
     for b in cells:
-        block_x = string.ascii_uppercase.index(b[0]) + starting_index
-        block_y = int(b[1:])
+        b = b.strip()
+        block_x = int(b[1:])
+        block_y = string.ascii_uppercase.index(b[0]) + starting_index
         block_coordinate = (block_x, block_y)
         block_coordinates.append(block_coordinate)
     return block_coordinates

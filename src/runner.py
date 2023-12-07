@@ -3,12 +3,10 @@ from typing import Any
 
 from core.drone_constants import EMPTY_STRING
 from core.drone_variables import DroneVariables
-from llms.llm_manager import LLMManager
-from prompts.prompt_factory import PromptFactory
+from src.core.plan_generator import PlanGenerator
 from test_data import test_drones, test_terrains
-from utils.drone_util import read_file
 
-MOCK_DEFAULT = True
+MOCK_DEFAULT = False
 ALPHA_DEFAULT = True
 test_responses = {
     False: "../examples/numeric_response.txt",
@@ -16,7 +14,7 @@ test_responses = {
 }
 
 
-def run(mock_response: bool = MOCK_DEFAULT, alpha_format: bool = ALPHA_DEFAULT):
+def run(should_mock: bool = MOCK_DEFAULT, alpha_format: bool = ALPHA_DEFAULT):
     logging.basicConfig()
     logging.root.setLevel(logging.INFO)
     logging.info("Starting prompt runner...")
@@ -26,25 +24,20 @@ def run(mock_response: bool = MOCK_DEFAULT, alpha_format: bool = ALPHA_DEFAULT):
         drones=test_drones,
         terrains=test_terrains,
         battery_changing_stations=[(1, 1), (1, 14), (8, 14), (8, 1)],
-        n_width_blocks=8,
-        n_height_blocks=14,
+        n_width_blocks=28,
+        n_height_blocks=16,
         launch_point=(1, 1),
         battery_time=30,
         cells_in_single_battery=3,
         weather_status="sunny",
-        search_priorities=["Waterways"],
+        search_priorities=["Search bodies of water first.", "Search woods next.", "Search areas immediately adjacent to woods."],
         use_alphabetical=alpha_format
     )
-    prompt_factory = PromptFactory(drone_variables)
-    prompt = prompt_factory.build()
 
-    logging.info("waiting for response....")
-    test_file = test_responses[alpha_format]
-    res_text = read_file(test_file) if mock_response else LLMManager.make_completion(prompt)
-    logging.info(res_text)
-
-    drones = prompt_factory.parse(res_text)
-    return drones
+    mock_response = test_responses[alpha_format] if should_mock else None
+    plan_generator = PlanGenerator(drone_variables)
+    initial_plan = plan_generator.generate_initial(mock_response=mock_response)
+    return initial_plan
 
 
 def prompt_tf(prompt: str, default_value: Any = None) -> bool:

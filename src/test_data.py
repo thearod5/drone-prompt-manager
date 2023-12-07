@@ -6,21 +6,38 @@ from utils.drone_util import to_numeric
 test_terrains = [
     {
         "type": "Waterway",
-        "blocks": to_numeric(["B2", "C1", "C2", "C3", "D1", "D2", "D3", "E1", "E2", "E3", "F1", "G1", "H1", "H2",
-                             "H3", "H4", "H5", "H6", "H7", "H8", "H9", "G9", "F9"])
+        "blocks": to_numeric(
+            ["B22", "B23", "B24", "C22", "C23", "C24", "D21", 'D22', "D23", "D24", "E21", "E22", "E23", "E24", "F21", "F22", "F23",
+             "G21", "G22", "G23", "G24"])
     },
     {
         "type": "Woodland",
-        "blocks": to_numeric(["A5", "B3", "B4", "B5", "B6", "C4", "C5", "C6", "D4", "D5", "D6", "E8", "F8", "G5", "G6", "G7"])
+        "blocks": to_numeric(
+            ["B3", "B4", "B5", "B6", "C3", "C4", "C5", "C6", "D3", "D4", "D5", "D6", "E3", "E4", "E5", "E6", "F5", "F6", "G5", "G6"])
     },
     {
         "type": "Waterway",
-        "blocks": to_numeric(["A13", "A14", "B12", "B13", "B14", "C12", "C13", "C14", "D12"])
+        "blocks": to_numeric(
+            ["J2", "J3", "J4", "K2", "K3", "K4", "L2", "L3", "L4", "M2", "M3", "N2", "O2", "P10", "P11", "P12", "P2", "P3", "P4", "P5",
+             "P6", "P7", "P8", "P9"])
     },
     {
         "type": "Woodland",
-        "blocks": to_numeric(["D13", "D14", "E12", "E13", "E14", "F12", "F13", "F14", "G12", "G13", "G14", "H11"])
-    }
+        "blocks": to_numeric(
+            ["E15", "E16", "E17", "F15", "F16", "F17", "G13", "G14", "G15", "G16", "H13", "H14", "H15", "I13", "I14", "J14"])
+    },
+    {
+        "type": "LaunchPad",
+        "blocks": to_numeric(["I8"])
+    },
+    {
+        "type": "BatteryCharging",
+        "blocks": to_numeric(["N16"])
+    },
+    {
+        "type": "BatteryCharging",
+        "blocks": to_numeric(["E20"])
+    },
 ]
 test_drones: List[DroneStruct] = [
     {

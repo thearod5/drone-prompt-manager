@@ -10,14 +10,14 @@ class MultiDictPrompt(Prompt):
     Responsible for formatting and parsing of presenting many drones in a prompt
     """
 
-    def __init__(self, tag_name: str, title: str = EMPTY_STRING):
+    def __init__(self, tag_name: str, title: str = EMPTY_STRING, instructions: str = EMPTY_STRING):
         """
         Constructor for making a prompt containing many artifacts.
         :param tag_name: Name of tag used to enclose individual content.
         :param title: The prefix to attach to prompt.
         """
         self.tag_name = tag_name
-        super().__init__(value=EMPTY_STRING, title=title)
+        super().__init__(value=instructions, title=title)
 
     def _build(self, drones: List[Dict] = None, terrains: List[Dict] = None, **kwargs) -> str:
         """

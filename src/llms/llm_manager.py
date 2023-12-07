@@ -1,10 +1,12 @@
 import os
-from typing import TypeVar
+from typing import TypeVar, Dict, List
 
 import openai
 from dotenv import load_dotenv
 
 from llms.llm_models import OpenAIModel
+
+from src.llms.token_calculator import TokenCalculator
 
 AIObject = TypeVar("AIObject")
 
@@ -24,22 +26,34 @@ class LLMManager:
     """
 
     @staticmethod
-    def make_completion(prompt: str, temperature: float = 0, model: OpenAIModel = OpenAIModel.GPT3) -> AIObject:
+    def make_completion(prompt: str, temperature: float = 0, model: OpenAIModel = OpenAIModel.GPT4,
+                        conversation_history: List[Dict] = None) -> List[Dict]:
         """
         Makes a request to completion a model
         :param prompt: The prompt to make completion for.
         :param temperature: The temperature to run the model at.
         :param model: The OpenAI model to use.
+        :param conversation_history: Contains all the previous responses and messages between AI and Human
         :return: The response from open AI.
         """
 
         assert isinstance(model, OpenAIModel), f"Expected OpenAIModel to be passed in but got {model}."
-        max_tokens = model.get_max_tokens()
+
+        conversation_history = [] if not conversation_history else conversation_history
+        conversation_history.append({"role": "user", "content": prompt})
+
+        if model == OpenAIModel.GPT4:
+            all_prompts = [p["content"] for p in conversation_history]
+            max_tokens = TokenCalculator.calculate_max_tokens(OpenAIModel.GPT4, "".join(all_prompts))
+        else:
+            max_tokens = model.get_max_tokens()
+
         params = {
             "max_tokens": max_tokens,
             "temperature": temperature,
             "model": model.value,
-            "messages": [{"role": "user", "content": prompt}]}
+            "messages": conversation_history}
         res = openai.ChatCompletion.create(**params)
         res_text = res.choices[0]["message"]["content"]
-        return res_text
+        conversation_history.append({"role": "assistant", "content": res_text})
+        return conversation_history

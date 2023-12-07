@@ -65,7 +65,7 @@ class DroneVariables:
         x = coordinate[0]
         y = coordinate[1]
         if self.use_alphabetical:
-            x = string.ascii_uppercase[x - 1]
-            return f"{x}{y}"
+            y = string.ascii_uppercase[y - 1]
+            return f"{y}{x}"
         return f"({x}, {y})"
  
