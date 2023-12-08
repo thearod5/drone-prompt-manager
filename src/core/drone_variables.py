@@ -1,6 +1,6 @@
 import string
 from dataclasses import dataclass
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 
 from core.drone_constants import COMMA
 from core.drone_struct import DroneStruct
@@ -20,10 +20,10 @@ class DroneVariables:
     :param battery_time: The length of a single battery run in minutes.
     :param cells_in_single_battery: The number of cells that can be searched in a single battery life.
     :param search_priorities: Human made list of terrains to prioritize.
+    :param plan_adaptation: Updated information for adapting the plan
     """
     drones: List[DroneStruct]
     terrains: List[TerrainStruct]
-    battery_changing_stations: Union[List[CoordinateType], str]
     drone_max_distance: int
     n_width_blocks: int
     n_height_blocks: int
@@ -33,6 +33,7 @@ class DroneVariables:
     search_priorities: List[str]
     weather_status: str
     use_alphabetical: bool = True
+    plan_adaptation: str = None
 
     def __post_init__(self):
         """
@@ -68,4 +69,13 @@ class DroneVariables:
             y = string.ascii_uppercase[y - 1]
             return f"{y}{x}"
         return f"({x}, {y})"
- 
+
+    def add_current_location_to_drones(self, coordinates: Dict) -> None:
+        """
+        Updates the drone information to contain their current location.
+        :param coordinates: Maps drone id to the coordinate it is currently at
+        :return: None
+        """
+        for drone in self.drones:
+            if drone["id"] in coordinates:
+                drone["current_location"] = self.translate_coordinate(coordinates[drone["id"]])

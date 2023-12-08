@@ -1,4 +1,5 @@
-from typing import List
+from copy import deepcopy
+from typing import List, Dict
 
 from src.core.drone_constants import N_DRONE_FLIGHTS, STARTING_FLIGHT_PLAN_NUM
 from src.core.drone_plan import DronePlanManager, DronePlan
@@ -15,15 +16,38 @@ class PlanGenerator:
         Uses the model to generate a flight plan for the scenario provided in the variables.
         :param drone_variables: The variables to include in the prompt.
         """
-        self.drone_variables = drone_variables
+        self.initial_configuration = drone_variables
+        self.current_configuration = drone_variables
         self.conversation_history = []
 
-    def generate_initial(self, mock_response: str = None) -> List[DronePlan]:
+    def generate_adaption(self, plan_adaptation: str, current_location_of_drones: Dict, **params) -> List[DronePlan]:
+        """
+        Uses the model to generate an adapted flight plan with the new information.
+        :param plan_adaptation: Contains the updated information for adapting the plan.
+        :param current_location_of_drones: Maps the id of the drone to its current cell location.
+          :return: A plan for each drone.
+        """
+        self.current_configuration = deepcopy(self.current_configuration)
+        self.current_configuration.plan_adaptation = plan_adaptation
+        self.current_configuration.add_current_location_to_drones(current_location_of_drones)
+        return self._generate(**params)
+
+    def generate_initial(self, **params) -> List[DronePlan]:
+        """
+        Uses the model to generate a flight plan for the scenario provided in the variables.
+        :return: A plan for each drone.
+        """
+        self.current_configuration = self.initial_configuration
+        return self._generate(**params)
+
+    def _generate(self, mock_response: str = None) -> List[DronePlan]:
         """
         Uses the model to generate a flight plan for the scenario provided in the variables.
         :param mock_response: If provided, uses the mock response in place of an actual generation from the model.
+        :return: A plan for each drone.
         """
-        prompt_factory = PromptFactory(self.drone_variables)
+        self.conversation_history.clear()
+        prompt_factory = PromptFactory(self.current_configuration)
         drone_plan_manager = DronePlanManager()
         last_flight_plan_num = N_DRONE_FLIGHTS + STARTING_FLIGHT_PLAN_NUM
         for i in range(STARTING_FLIGHT_PLAN_NUM, last_flight_plan_num):

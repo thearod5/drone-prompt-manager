@@ -10,3 +10,4 @@ class DroneStruct(TypedDict):
     id: str
     camera: Optional[List[str]]
     equipment: Optional[List[str]]
+    current_location: Optional[str]
