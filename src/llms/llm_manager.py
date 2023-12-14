@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from llms.llm_models import OpenAIModel
 
-from src.llms.token_calculator import TokenCalculator
+from llms.token_calculator import TokenCalculator
 
 AIObject = TypeVar("AIObject")
 
@@ -56,4 +56,10 @@ class LLMManager:
         res = openai.ChatCompletion.create(**params)
         res_text = res.choices[0]["message"]["content"]
         conversation_history.append({"role": "assistant", "content": res_text})
+        '''
+        print()
+        print("CONVERSATION HISTORY")
+        print(conversation_history)
+        print()
+        '''
         return conversation_history

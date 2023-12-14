@@ -1,0 +1,35 @@
+<terrains>
+    <terrain>
+        <type>Woodland</type>
+        <blocks>B3,B4,B5,B6,C3,C4,C5,C6,D3,D4,D5,D6,E3,E4,E5,E6,F5,F6,G5,G6</blocks>
+    </terrain>
+    <terrain>
+        <type>Woodland</type>
+        <blocks>E15,E16,E17,F15,F16,F17,G13,G14,G15,G16,H13,H14,H15,I13,I14,J14</blocks>
+    </terrain>
+    <terrain>
+        <type>Woodland</type>
+        <blocks>N22,N23,N24,N25,O22,O23,O24,O25</blocks>
+    </terrain>
+    <terrain>
+        <type>Waterway</type>
+        <blocks>B22,B23,B24,C22,C23,C24,D21,D22,D23,D24,E21,E22,E23,E24,F21,F22,F23,G21,G22,G23,G24</blocks>
+    </terrain>
+    <terrain>
+        <type>Waterway</type>
+        <blocks>J2,J3,J4,K2,K3,K4,L2,L3,L4,M2,M3,N2,O2,P10,P11,P12,P2,P3,P4,P5,P6,P7,P8,P9</blocks>
+    </terrain>
+    <terrain>
+        <type>LaunchPad</type>
+        <blocks>I8</blocks>
+    </terrain>
+    <terrain>
+        <type>BatteryCharging</type>
+        <blocks>N16</blocks>
+    </terrain>
+    <terrain>
+        <type>BatteryCharging</type>
+        <blocks>E20</blocks>
+    </terrain>
+
+</terrains>

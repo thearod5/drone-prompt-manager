@@ -25,6 +25,7 @@ class DroneVariables:
     drones: List[DroneStruct]
     terrains: List[TerrainStruct]
     drone_max_distance: int
+    battery_changing_stations: Union[List[CoordinateType], str]
     n_width_blocks: int
     n_height_blocks: int
     launch_point: Union[CoordinateType, str]

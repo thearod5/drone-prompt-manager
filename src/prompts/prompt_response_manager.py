@@ -8,6 +8,10 @@ from core.drone_constants import EMPTY_STRING
 from prompts.prompt_util import PromptUtil
 from utils.drone_llm_response_util import LLMResponseUtil
 from utils.drone_util import format_selective
+from xml.etree.ElementTree import Element, SubElement, fromstring, tostring, parse
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
+import copy
 
 RESPONSE_FORMAT = "Enclose your answer inside of {}"
 REQUIRE_ALL_TAGS = str(uuid.uuid4())
@@ -66,6 +70,9 @@ class PromptResponseManager:
      p1, c1.1, .. c1.n, p2, c2.1, .. c2.n,... pn, cn.1, .. cn.n
     """
     _all_tag_ids: List[str] = field(init=False, default_factory=list)
+
+    global_drones = Element('drones') 
+    xml_front_end = None
 
     def __post_init__(self) -> None:
         """
@@ -130,6 +137,93 @@ class PromptResponseManager:
         kwargs = {id_: PromptUtil.create_xml(tag_name=tag) for id_, tag in self.id2tag.items()}
         return format_selective(self.response_instructions_format, *args, **kwargs)
 
+    
+
+    def update_flights(self,response,flight_round):
+        """
+        Update a specific flight for each drone with the incremental flight information.
+        """
+
+        # Find the starting point of the first <drone> tag
+        drone_tag_start = response.find("<drone>")
+        if drone_tag_start == -1:
+            print("No drone information found in the provided data.")
+            return
+
+        # Extract only the XML part starting from the first <drone> tag
+        xml_part = response[drone_tag_start:]
+
+        # Parse the drone flight information
+        new_flights_root = ET.fromstring("<root>" + xml_part + "</root>")
+
+        for new_drone in new_flights_root.findall('drone'):
+            drone_id = new_drone.find('id').text if new_drone.find('id') is not None else None
+            a_tag = new_drone.find('a').text if new_drone.find('a') is not None else ""
+            b_tag = new_drone.find('b').text if new_drone.find('b') is not None else ""
+            c_tag = new_drone.find('c').text if new_drone.find('c') is not None else ""
+
+            if drone_id:
+                # Find the drone in the adapted XML
+                existing_drone = self.adapted_xml_front_end.find(f".//drone[id='{drone_id}']")
+                if existing_drone is not None:
+                    # Find and remove the specific flight round to update
+                    flight_to_remove = existing_drone.find(f"flight[@round='{flight_round}']")
+                    if flight_to_remove is not None:
+                        existing_drone.remove(flight_to_remove)
+
+                    # Add the new flight information
+                    flight = SubElement(existing_drone, 'flight', {'round': str(flight_round)})
+                    SubElement(flight, 'a').text = f"FLY TO {a_tag}"
+                    SubElement(flight, 'b').text = f"SEARCH {b_tag}"
+                    SubElement(flight, 'c').text = f"FLY TO {c_tag}"
+
+    def get_front_end_xml_adapted(self):
+        return self.adapted_xml_front_end
+    
+    def get_front_end_xml(self):
+        return self.xml_front_end
+    
+    def parse_response_front_end(self,input_xml):
+        try:
+            root = ET.fromstring("<root>" + input_xml + "</root>")  # Using a root tag to handle multiple drones
+        except ET.ParseError:
+            return 
+        done_tag = root.find("done")
+        value = done_tag.text
+        if value == "true":
+            return True 
+        for element in root:
+            if element.tag == 'drone':
+                drone_id = element.find('id').text if element.find('id') is not None else "Unknown"
+                a_tag = element.find('a').text if element.find('a') is not None else ""
+                b_tag = element.find('b').text if element.find('b') is not None else ""
+                c_tag = element.find('c').text if element.find('c') is not None else ""
+
+                existing_drone = None
+                for d in self.global_drones.findall('drone'):
+                    if d.find('id').text == drone_id:
+                        existing_drone = d
+                        break
+
+                if existing_drone is not None:
+                    flight_round = len(existing_drone.findall('flight')) + 1
+                else:
+                    existing_drone = SubElement(self.global_drones, 'drone')
+                    SubElement(existing_drone, 'id').text = drone_id
+                    flight_round = 1
+
+                flight = SubElement(existing_drone, 'flight', {'round': str(flight_round)})
+                SubElement(flight, 'a').text = f"FLY TO {a_tag}"
+                SubElement(flight, 'b').text = f"SEARCH {b_tag}"
+                SubElement(flight, 'c').text = f"FLY TO {c_tag}"
+
+        # Update the xml_front_end with the current state of global_drones
+        self.xml_front_end = self.global_drones
+        return False 
+
+    def parse_response_adaptation(self,response:str,flight_num:int):
+        self.update_flights(response,flight_num)
+
     def parse_response(self, response: str) -> Dict[str, Any]:
         """
         Parses the response from the model in the expected format for the prompt
@@ -139,6 +233,15 @@ class PromptResponseManager:
         if not self.response_tag:
             return {}
         output = {}
+        print()
+        print("response")
+        print(response)
+        print()
+        returned_val = self.parse_response_front_end(response)
+        
+        if returned_val == True:
+            return True
+
         if isinstance(self.response_tag, dict):
             for parent, child_tags in self.response_tag.items():
                 values = LLMResponseUtil.parse(response, parent, is_nested=True, raise_exception=parent in self.required_tag_ids)
@@ -153,7 +256,7 @@ class PromptResponseManager:
                 parsed = LLMResponseUtil.parse(response, tag, is_nested=False, raise_exception=tag in self.required_tag_ids)
                 output[tag_id] = parsed if len(parsed) > 0 else [None]
         formatted_output = self._format_response(output)
-        return formatted_output
+        return False 
 
     def _format_response(self, output: Dict[str, Any]) -> Dict[str, Any]:
         """

@@ -1,12 +1,15 @@
 import logging
 import random
 from typing import Any, List
-
 from core.drone_constants import EMPTY_STRING
 from core.drone_variables import DroneVariables
-from src.core.drone_plan import DronePlan
-from src.core.plan_generator import PlanGenerator
-from test_data import test_drones, test_terrains
+from core.drone_plan import DronePlan
+from core.plan_generator import PlanGenerator
+from test_data import test_drones
+from tkinter import filedialog
+import os 
+from utils.drone_util import to_numeric
+import xml.etree.ElementTree as ET
 
 MOCK_DEFAULT = False
 ALPHA_DEFAULT = True
@@ -14,6 +17,39 @@ test_responses = {
     False: "../examples/numeric_response.txt",
     True: "../examples/alpha_response.txt"
 }
+
+def parse_xml_file(file_name):
+    # Parse the XML file
+    tree = ET.parse(file_name)
+    root = tree.getroot()
+
+    # Process each terrain element
+    test_terrains = []
+    for terrain in root.findall('terrain'):
+        terrain_type = terrain.find('type').text
+        blocks = terrain.find('blocks').text.split(',')
+
+        # Add to the test_terrains list
+        test_terrains.append({
+            "type": terrain_type,
+            "blocks": to_numeric(blocks)
+        })
+
+    return test_terrains
+
+def open_terrain_file():
+    filename = filedialog.askopenfilename(defaultextension=".xml", filetypes=[("XML files", "*.xml")])
+    if filename:
+        return filename
+    else:
+        # Handle case where the user does not select a file
+        return None
+
+terrain_file = open_terrain_file()
+
+test_terrains = parse_xml_file(terrain_file)
+print('test terrains')
+print(test_terrains)
 drone_variables = DroneVariables(
     drone_max_distance=8,
     drones=test_drones,
@@ -59,15 +95,13 @@ def prompt_tf(prompt: str, default_value: Any = None) -> bool:
         return default_value
     return any([p in user_response for p in pos_responses])
 
-
 if __name__ == "__main__":
     logging.basicConfig()
     logging.root.setLevel(logging.INFO)
     logging.info("Starting prompt runner...")
     initial = run_initial_plan_generation(should_mock=MOCK_DEFAULT)
-    adaption = run_adaption_plan_generation(plan_adaptation="The missing person has been found at location K10.",
-                                            adapted_plan=initial,
-                                            current_index_of_drones=random.randint(0, len(initial[0].coordinates))-1,
-                                            should_mock=MOCK_DEFAULT)
+    
+    '''
     for drone in initial:
         print(drone.id, ":", drone.coordinates)
+    '''

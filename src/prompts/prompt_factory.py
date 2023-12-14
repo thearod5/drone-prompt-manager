@@ -11,16 +11,16 @@ from prompts.prompt_response_manager import PromptResponseManager
 from prompts.questionnaire_prompt import QuestionnairePrompt
 from utils.drone_util import parse_coordinates
 
-from src.core.drone_constants import STARTING_FLIGHT_PLAN_NUM, START_KEY, SEARCH_KEY, END_KEY
-from src.prompts.prompt_util import PromptUtil
+from core.drone_constants import STARTING_FLIGHT_PLAN_NUM, START_KEY, SEARCH_KEY, END_KEY
+from prompts.prompt_util import PromptUtil
 
 
 class PromptFactory:
     RESPONSE_FORMAT_EXAMPLE = {DRONE_ID_KEY: "[Drone ID e.g., Purple]",
                                START_KEY: "[Starting Cell]",
                                SEARCH_KEY: "[List of adjacent cells to search separated by commas]",
-                               END_KEY: "[Ending Cell (nearest charging station)]"}
-    ORDINAL_NUMBERS = ["first", "second", "third", "fourth", "fifth"]
+                               END_KEY: "[Ending Cell]"}
+    ORDINAL_NUMBERS = ["first", "second", "third", "fourth", "fifth","sixth","seventh","eigth","ninth","tenth"]
 
     def __init__(self, variables: DroneVariables):
         """
@@ -28,6 +28,7 @@ class PromptFactory:
         :param variables: The variables to include in the prompt.
         """
         self.variables = variables
+        self.adaptation = False
         self.builder = None
         self.task_prompt = None
         self.response_manager = PromptResponseManager({
@@ -40,38 +41,67 @@ class PromptFactory:
         :param flight_plan_num: Which flight plan is being generated.
         :return: The prompt to provide to generate the flight plan.
         """
-
-        if flight_plan_num == STARTING_FLIGHT_PLAN_NUM:
-            if self.variables.plan_adaptation:
+        if self.adaptation:
+            if flight_plan_num == 1:
                 self.task_prompt = self._build_adaption_prompt()
-                objective_prompt = None
+                tasks = [self._build_mission_description(),
+                QuestionnairePrompt([self._build_reasoning(), 
+                self.task_prompt],instructions=PromptUtil.as_markdown_header("TASKS"))]
+                self.builder = PromptBuilder(tasks, title="Task")
+                prompt = self.builder.build(DronePromptArgs,
+                                            **vars(self.variables),
+                                            delimiter=NEW_LINE + NEW_LINE)
+                prompt_text = prompt["prompt"]
+                return prompt_text
             else:
-                self.task_prompt = self._build_task_prompt(flight_plan_num=flight_plan_num)
-                objective_prompt = self._build_objectives(self.variables.search_priorities)
-            tasks = [
-                self._build_mission_description(), self._build_flight_stages_description(), self._build_search_rules(),
-                self._build_search_area(), self._build_drones(), QuestionnairePrompt([self._build_reasoning(), self.task_prompt],
-                                                                                     instructions=PromptUtil.as_markdown_header(
-                                                                                         "TASKS"))
-            ]
-            if objective_prompt:
-                tasks.insert(3, objective_prompt)
-        else:
-            tasks = [self.task_prompt]
-        self.builder = PromptBuilder(tasks, title="Task")
-        prompt = self.builder.build(DronePromptArgs,
+                self.task_prompt = self._build_task_prompt_adaptation(flight_plan_num=flight_plan_num)
+                tasks = [self.task_prompt]
+                self.builder = PromptBuilder(tasks, title="Task")
+                prompt = self.builder.build(DronePromptArgs,
                                     **vars(self.variables),
                                     delimiter=NEW_LINE + NEW_LINE)
-        prompt_text = prompt["prompt"]
-        return prompt_text
+                prompt_text = prompt["prompt"]
+                return prompt_text 
+        else:
+            if flight_plan_num == STARTING_FLIGHT_PLAN_NUM:
+                self.task_prompt = self._build_task_prompt(flight_plan_num=flight_plan_num)
+                objective_prompt = self._build_objectives(self.variables.search_priorities)
+                tasks = [
+                self._build_mission_description(), self._build_flight_stages_description(), self._build_search_rules(),
+                self._build_search_area(), self._build_drones(), QuestionnairePrompt([self._build_reasoning(), self.task_prompt],
+                                                                                    instructions=PromptUtil.as_markdown_header(
+                                                                                        "TASKS"))
+                ]
+                if objective_prompt:
+                    tasks.insert(3, objective_prompt)
+            else:
+                self.task_prompt = self._build_task_prompt(flight_plan_num=flight_plan_num)
+                tasks = [self.task_prompt]
 
-    def parse(self, res: str) -> List[DronePlan]:
+            self.builder = PromptBuilder(tasks, title="Task")
+            prompt = self.builder.build(DronePromptArgs,
+                                        **vars(self.variables),
+                                        delimiter=NEW_LINE + NEW_LINE)
+            prompt_text = prompt["prompt"]
+            return prompt_text
+
+    def parse(self, res: str,flight_num=None) -> List[DronePlan]:
         """
         Parses the response from the model to create a flight plan.
         :param res: The response from the model.
         :return: A list of plans for each drone.
         """
+        if self.adaptation:
+            print()
+            print("response")
+            print(res)
+            print()
+            self.response_manager.parse_response_adaptation(res,flight_num)
+            return 
+
         parsed_response = self.response_manager.parse_response(res)
+        return parsed_response 
+        '''
         id2struct = {}
         for drone_plan in parsed_response[DRONE_KEY]:
             drone = self.entry_formatter(drone_plan)
@@ -79,9 +109,9 @@ class PromptFactory:
             if drone_id not in id2struct:
                 id2struct[drone_id] = []
             id2struct[drone_id].extend(drone[CELLS_KEY])
-
         drone_plans = [DronePlan(d_id, blocks) for d_id, blocks in id2struct.items()]
         return drone_plans
+        '''
 
     def entry_formatter(self, v) -> Dict:
         """
@@ -152,9 +182,10 @@ class PromptFactory:
             "All subsequent flights start at the nearest recharging stations. ",
             title="Mission Description"
         )
-        if self.variables.plan_adaptation:
-            mission_description.value += "\n*UPDATE*: {plan_adaptation} " \
-                                         f"Your goal will be to adapt the current plan with this new information."
+        if self.adaptation:
+            mission_description.value = "\n*UPDATE*: {plan_adaptation} " \
+                                         f"Your goal will be to adapt the current plan with this new information. " \
+                                         f"All drones have completed flight number 3."  
         return mission_description
 
     @staticmethod
@@ -212,8 +243,9 @@ class PromptFactory:
        Builds the prompt containing reasoning questions for the model
        :return: The prompt containing reasoning questions for the model
        """
-        if self.variables.plan_adaptation:
-            questions = ["How will adjust the plan based on the new information?"]
+        if self.adaptation:
+            questions = ["How will you adjust the plan based on the new information?", 
+                         "How will the new fourth flight be different from the older plan's fourth flight?"]
         else:
             questions = ["Can drones search cells that have already been searched?",
                          "How could battery usage be optimized?", "What area should each drone search first and why? "
@@ -230,10 +262,26 @@ class PromptFactory:
        :param flight_plan_num: The number of the current flight plan to generate.
        :return: The prompt containing the main task (build a flight plan) for the model
        """
-        instructions = f"Next, please plan the {self.ORDINAL_NUMBERS[flight_plan_num]} " \
-                       f"flight for each of the {len(self.variables.drones)} drones.  " \
-                       f"Each drone should have a unique plan. If the drone has special equipment, " \
-                       f"consider optimizing the plan to where it is best suited. "
+        if flight_plan_num == STARTING_FLIGHT_PLAN_NUM:
+            instructions = f" Next, please plan the {self.ORDINAL_NUMBERS[flight_plan_num]} " \
+                           f"flight for each of the {len(self.variables.drones)} drones.  " 
+        else:
+            instructions = f"First, answer the question, have all priorities been searched? " \
+                           f"If not, please plan the {self.ORDINAL_NUMBERS[flight_plan_num]} " \
+                           f"flight for each of the {len(self.variables.drones)} drones.  " \
+                           f"Remember that no search cells can be repeated, and " \
+                           f"remember to stop the mission when all priorities have been searched. Please explain your reasoning if you do. "
+        return self._get_task_prompt(instructions=instructions, flight_plan_num=flight_plan_num)
+
+    def _build_task_prompt_adaptation(self, flight_plan_num: int) -> Prompt:
+        """
+       Builds the prompt containing the main task (build a flight plan) for the model
+       :param flight_plan_num: The number of the current flight plan to generate.
+       :return: The prompt containing the main task (build a flight plan) for the model
+       """
+        instructions = f"Next, please plan the {flight_plan_num} " \
+                       f"flight adaptation for each of the {len(self.variables.drones)} drones.  " \
+                       f"Output the results using the same format. Remember that no cells should be repeated in the search."
         return self._get_task_prompt(instructions=instructions, flight_plan_num=flight_plan_num)
 
     def _build_adaption_prompt(self) -> Prompt:
@@ -242,11 +290,11 @@ class PromptFactory:
        :return: The prompt containing adaption task for the model
        """
         instructions = "Remember: {plan_adaptation}\n" \
-                       f"With this new information, create a flight for each of the {len(self.variables.drones)} drones.  " \
-                       f"Each drone should have a unique plan. If the drone has special equipment, " \
-                       f"consider optimizing the plan to where it is best suited. " \
-                       f"Each drone must start at its current location. "
-        return self._get_task_prompt(instructions=instructions)
+                       f"With this new information, create a new flight plan for each of the {len(self.variables.drones)} drones.  " \
+                       f"Remember, the drones have finished the previous plan's third flight, so output the new fourth flight using the same format." \
+                       f" Remember that no cells should be repeated in the search."
+        flight_plan_questionnaire = Prompt(instructions, response_manager=self.response_manager)
+        return flight_plan_questionnaire 
 
     def _get_task_prompt(self, instructions: str, flight_plan_num: int = STARTING_FLIGHT_PLAN_NUM) -> Prompt:
         """
@@ -256,11 +304,12 @@ class PromptFactory:
         :return: The task prompt
         """
         if flight_plan_num == STARTING_FLIGHT_PLAN_NUM:
-            instructions += "Each drone must cover approximately {cells_in_single_battery} cells, " \
-                            "and then return to a charging cell. Drones can only move to adjacent cells. " \
-                            "Structure output as follows:\n"
+            instructions += f"Each drone must cover approximately {self.variables.cells_in_single_battery} cells, " \
+                            f"and then return to a charging cell. Remember that no cells should be repeated in the search, and drones can only move to adjacent cells. " \
+                            f"\n Output the results using the same format. " \
+                            f"You will receive multiple flight requests incrementally. " \
+                            f"If you think that the flight plans should be completed, please indicate that the mission is done and explain your reasoning. Structure output as follows:\n" 
             instructions += MultiDictPrompt(DRONE_KEY).build(drones=[self.RESPONSE_FORMAT_EXAMPLE])
-        else:
-            instructions += f"Each drone should start at the Ending Cell ({END_KEY}) of its last flight."
+            instructions += "\n  At the beginning of each response, enclose a boolean inside <done></done> representing if the mission is done or not. There should be less than 8 flights for each of the five drones individually." 
         flight_plan_questionnaire = Prompt(instructions, response_manager=self.response_manager)
         return flight_plan_questionnaire
